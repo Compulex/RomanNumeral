@@ -1,0 +1,37 @@
+body{
+    text-align: center;
+}
+#main{
+	text-align: center;
+	display: inline-block;
+	width: 95%;
+}
+#conv{
+	margin-bottom: 10px;
+}
+th, td{
+	border: 1px solid black;
+}
+
+table{
+	border: 2px solid black;
+	border-collapse: collapse;
+	width: 85%;
+	margin: auto;
+	padding: 5px;
+
+}
+
+th{
+	padding: 1em;
+	text-align: center;
+}
+
+td{
+	margin: 2px;
+	padding: 2px;
+}
+
+.sideHeaders{
+	font-weight: bold;
+}
