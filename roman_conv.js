@@ -1,11 +1,17 @@
-var main = document.getElementById("main");
+//create div
+var main = document.createElement("div");
+main.setAttribute("id", "main");
+
 var roman_numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
 var rn_tens = ["X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"]; 
 var spc = ["C", "CD", "D", "CM", "M"];
 var spcn = ["100", "400", "500", "900", "1000"];
 var here = false;
 
+makeTable();
+
 function makeTable(){
+    //make table
     var table = document.createElement("table");
     var num = document.createElement("tr");
     num.setAttribute("id", "headers");
@@ -93,8 +99,9 @@ function makeTable(){
 
         table.appendChild(sprow);
     }
-
+    
     main.appendChild(table);
+    document.body.appendChild(main);
 }//makeTable
 
 //roman numerals
