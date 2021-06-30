@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!--<link rel="stylesheet" href="style.css">-->
+        <title>Current Weather</title>
+        <style>
+            body{
+                text-align: center;
+            }
+            #main, .section{
+                padding: 5px;
+            }
+            .section{
+                position: absolute;
+                width: 25%;
+                display: none;
+            }
+            #main{
+                background-color: #f7c16a;
+                text-align: center;
+                display: inline-block;
+                width: 80%;
+                height: 350px;
+                position: relative;
+                margin-top: 5px;
+            }
+            #side_a{
+                right: 70%;
+            }
+            #info{
+                margin-left: auto;
+                margin-right: auto;
+                left: 0;
+                right: 0;
+                text-align: center;
+            }
+            #side_b{
+                left: 70%;
+            }
+
+            @media only screen and (max-width: 620px){
+                #main{
+                    height: 90%;
+                    width: 80%;
+                    text-align: center;
+                    display: inline-block;
+                }
+                .section{
+                    position: relative;
+                    text-align: center;
+                    width: 95%;
+                }
+                #side_a{ right: 0; }
+                #side_b{ left: 0; }
+            }
+        </style>
+
+        <script type="text/javascript">
+
+            function getTime(){
+                var now = new Date();
+                var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                var dStr = days[now.getDay()] + " " + months[now.getMonth()] + " " + now.getDate() + " " + now.getFullYear();
+                var timeStr = document.getElementById("time");
+                timeStr.innerHTML = dStr + "   " + now.toLocaleTimeString();
+                var h1 = document.getElementsByTagName("h1")[0];
+
+                //greeting
+                var greet = document.getElementById("greeting");
+                if(now.getHours() < 4){
+                    greet.innerHTML = "Good Early Morning";
+                    document.body.style.backgroundColor = "#27214e";
+                    h1.style.color = "white";
+                    timeStr.style.color = "white";
+                }
+                else if(now.getHours() >= 4 && now.getHours() < 12){
+                    greet.innerHTML = "Good Morning";
+                    document.body.style.backgroundColor = "#00bfff";
+                    h1.style.color = "black";
+                    timeStr.style.color = "black";
+                }
+                else if(now.getHours() >= 12 && now.getHours() < 17){
+                    greet.innerHTML = "Good Afternoon";
+                    document.body.style.backgroundColor = "#00bfff";
+                    h1.style.color = "black";
+                    timeStr.style.color = "black";
+                    
+                }
+                else if(now.getHours() >= 17){
+                    greet.innerHTML = "Good Evening";
+                    document.body.style.backgroundColor = "#27214e";
+                    h1.style.color = "white";
+                    timeStr.style.color = "white";
+                }
+                //ongoing time
+                runTime();
+            }//getTime
+
+            function runTime(){
+                var time = setTimeout(getTime, 1000);
+            }//runTime
+
+        </script>
+    </head>
+    <body onload="getTime();">
+        <h1>Current Weather</h1>
+
+        <h2 id="time"></h2>
+
+        <input type="number" id="zip_code" size="5" max="98039" placeholder="US zip code">
+        <button id="weather_btn" onclick="getWeather()">Look Up Area</button>
+
+        <div id="main">
+            
+            <h2 id="greeting"></h2>
+            <h2 id="error"></h2>
+
+            <div id="info" class="section">
+
+                <h2 id="city"></h2>
+                <h3 id="temp"></h3>
+                <h3 id="feels"></h3>
+    
+                <img id="condition">
+                <figcaption></figcaption>
+
+            </div>
+            
+            <div id="side_a" class="section">
+
+                <h2 id="high_low"></h2>
+
+                <p id="sunrise"></p>
+                <p id="sunset"></p>
+
+            </div>
+            
+            <div id="side_b" class="section">
+
+                <h2>Might Need</h2>
+                <h3 id="accessories"></h3>
+
+            </div>
+
+        </div>
+        
+
+        <script type="text/javascript">
+            /**
+             * Get all nodes
+             * call api
+             * function to get all weather info
+             */
+            
+            var main = document.getElementsByClassName("section");
+            var zip_code = document.getElementById("zip_code");
+            var city = document.getElementById("city");
+            var temp = document.getElementById("temp");
+            var img = document.getElementById("condition");
+            var feels = document.getElementById("feels");
+            var tmax_min = document.getElementById("high_low");
+
+            function getWeather(){
+                var zip = zip_code.value;
+                if(zip > 98039){
+                    alert("Too long or passed the highest US zip code");
+                }
+                else if(zip.toString().length < 5){
+                    alert("Too short or in the negative, need +5 digits");
+                }
+                else{
+                    zip_code.value = "";
+                    document.getElementById("error").style.display = "block";
+                    apiCall(zip);
+                }
+                
+            }//getWeather
+
+            function apiCall(zip){
+                let xhr = new XMLHttpRequest();
+                let curr_url = "http://api.openweathermap.org/data/2.5/weather?zip=" + 
+                    zip + ",us&units=imperial&appid=a67372038875e2186074b6fa66bccb08";
+
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState === 4 && xhr.status === 200){
+                        document.getElementById("error").style.display = "none";
+                        let info = JSON.parse(xhr.responseText);
+                        displayCurrInfo(zip, info);
+                    }
+                    else if(xhr.status === 404){
+                        main[0].style.display = "none";
+                        main[1].style.display = "none";
+                        main[2].style.display = "none";
+                        document.getElementById("error").innerHTML = "Zip Code (" + zip + ") Not Found";
+                    }
+                };
+                xhr.open("GET", curr_url, true);
+                xhr.send();
+            }//apiCall
+
+            function displayCurrInfo(zip, winfo){
+                var sunrise = winfo.sys.sunrise;
+                var sunset = winfo.sys.sunset;
+                var sr_date = new Date(sunrise * 1000);
+                var ss_date = new Date(sunset * 1000);
+                var now = new Date();
+
+                //color
+                bkgrd_color(now.getTime(), sr_date.getTime(), ss_date.getTime());
+
+                //display divs
+                main[0].style.display = "block";
+                main[1].style.display = "block";
+                main[2].style.display = "block";
+
+                city.innerHTML = winfo.name + " (" + zip + ")";
+
+                temp.innerHTML = parseInt(winfo.main.temp) + " &#8457;";
+
+                //img of weather condition
+                img.src = "http://openweathermap.org/img/wn/"+ winfo.weather[0].icon +"@2x.png";
+                img.alt = "Weather Condition";
+                document.getElementsByTagName("figcaption")[0].innerHTML = winfo.weather[0].description;
+
+                conditions(winfo.weather[0].description, parseInt(winfo.main.feels_like));
+                
+                //time
+                document.getElementById("sunrise").innerHTML = "Sunrise &#x1F305;: " + sr_date.toLocaleTimeString();
+                document.getElementById("sunset").innerHTML = "Sunset &#x1F307;: " + ss_date.toLocaleTimeString();
+
+                //high low temp
+                tmax_min.innerHTML = "High: " + parseInt(winfo.main.temp_max) + " &#8457;" + 
+                                    " - Low: " + parseInt(winfo.main.temp_min) + " &#8457;";
+                
+                //feels like
+                feels.innerHTML = "Feels Like: " + parseInt(winfo.main.feels_like) + " &#8457;";
+
+            }//displayInfo
+
+            function bkgrd_color(now, sr, ss){
+                console.log(now + " " + sr + " " + ss);
+                if(now < sr){ //dark in the morning usual: 12AM - (5AM-8AM)
+                    document.body.style.backgroundColor = "#27214e";
+                }
+                else if(now === sr){ //at sunrise 
+                    document.body.style.backgroundColor = "#b5d6e0";
+                    //console.log();
+                }
+                else if(now > sr){ //during the day (5AM-8AM) - (5PM-8PM)
+                    document.body.style.backgroundColor = "#00bfff";
+                }
+                else if(now === ss){ //at sunset
+                    document.body.style.backgroundColor = "#ff6b3e";
+                }
+                else if(now > ss){ //during the night (5PM-8PM) - 1159PM
+                    document.body.style.backgroundColor = "#27214e";
+                }
+            }//bkgrd_color
+
+            function conditions(desc, temp){
+                /*Emojis
+                    hats: sunhat=&#x;  cap=&#x1F9E2; 
+                    scarf=&#x1F9E3
+                    gloves=&#x1F9E4
+                    umbrella=&#x1F302
+                    water in cup= &#x1F9CA; + &#x1F964;
+                */
+                var extras = document.getElementById("accessories");
+
+                //rain or snow
+                if(desc.includes("rain")){
+                    extras.innerHTML = "&#x1F302;";
+                    //feels like temperature
+                    if(temp < 40){
+                        extras.innerHTML += "&#x1F9E2;  &#x1F9E3;  &#x1F9E4;";
+                    }
+                    else if(temp >= 60){
+                        extras.innerHTML += "&#x1F452;  &#x1F9CA; + &#x1F964;";
+                    }
+                }
+                else if(desc.includes("snow")){
+                    extras.innerHTML = "&#x1F9E2;  &#x1F9E3;  &#x1F9E4;";
+                }
+                else{
+                    //feels like temperature
+                    if(temp < 40){
+                        extras.innerHTML = "&#x1F9E2;  &#x1F9E3;  &#x1F9E4;";
+                    }
+                    else if(temp >= 60){
+                        extras.innerHTML = "&#x1F452; or &#x1F9E2;  &#x1F9CA; + &#x1F964;";
+                    }
+                }
+            }//conditions
+        </script>
+    </body>
+</html>
